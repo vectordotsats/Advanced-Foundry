@@ -78,4 +78,16 @@ contract TestOurToken is Test {
         vm.expectRevert();
         ourToken.transfer(address(0), 1 ether);
     }
+
+    function testTransferFromWithoutApprovalReverts() public {
+        vm.prank(alice);
+        vm.expectRevert();
+        ourToken.transferFrom(bob, alice, 1 ether);
+    }
+
+    function testMetadata() public view {
+        assertEq(ourToken.name(), "Our Token");
+        assertEq(ourToken.symbol(), "OT");
+        assertEq(ourToken.decimals(), 18);
+    }
 }
