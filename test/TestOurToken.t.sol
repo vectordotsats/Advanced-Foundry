@@ -23,6 +23,12 @@ contract TestOurToken is Test {
         ourToken.transfer(bob, startingBalance);
     }
 
+    function testTotoalSupplyAssignedToDeployer() public view {
+        uint256 totalSupply = ourToken.totalSupply();
+        uint256 deployerBalance = ourToken.balanceOf(msg.sender);
+        assertEq(deployerBalance, totalSupply - startingBalance);
+    }
+
     function testBobBalance() public view {
         uint256 bobBalance = ourToken.balanceOf(bob);
         assertEq(bobBalance, startingBalance);
@@ -49,5 +55,27 @@ contract TestOurToken is Test {
         vm.prank(alice);
         vm.expectRevert();
         ourToken.transferFrom(bob, alice, exceededAllowance);
+    }
+
+    function testTransferBetweenAccounts() public {
+        uint256 amount = 10 ether;
+
+        vm.prank(bob);
+        ourToken.transfer(alice, amount);
+
+        assertEq(ourToken.balanceOf(bob), startingBalance - amount);
+        assertEq(ourToken.balanceOf(alice), amount);
+    }
+
+    function testTransferInsufficientBalanceReverts() public {
+        vm.prank(alice);
+        vm.expectRevert();
+        ourToken.transfer(bob, 1 ether); // alice has 0
+    }
+
+    function testTransferToZeroAddressReverts() public {
+        vm.prank(bob);
+        vm.expectRevert();
+        ourToken.transfer(address(0), 1 ether);
     }
 }
